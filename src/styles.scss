@@ -1,1 +1,107 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://naologic-com-assets.naologic.com/fonts/circular-std/circular-std.css');
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Circular-Std', Arial, sans-serif;
+  background: rgba(246, 248, 252, 1);
+}
+
+ngb-datepicker {
+  font-family: 'Circular-Std', Arial, sans-serif !important;
+  border: 1px solid rgba(216, 220, 235, 1) !important;
+  border-radius: 8px !important;
+  box-shadow:
+    0 0 0 1px rgba(104, 113, 150, 0.08),
+    0 4px 12px rgba(200, 207, 233, 0.8) !important;
+  overflow: hidden !important;
+}
+
+.ngb-dp-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid rgba(230, 235, 240, 1) !important;
+  padding: 10px 12px !important;
+}
+
+.ngb-dp-month-name {
+  color: rgba(47, 48, 89, 1) !important;
+  font-family: 'Circular-Std', Arial, sans-serif !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+}
+
+.ngb-dp-weekday {
+  color: rgba(104, 113, 150, 1) !important;
+  font-family: 'Circular-Std', Arial, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 400 !important;
+  font-style: normal !important;
+}
+
+.ngb-dp-day,
+.ngb-dp-week-number {
+  font-family: 'Circular-Std', Arial, sans-serif !important;
+  font-size: 12px !important;
+}
+
+.bg-primary {
+  background-color: rgba(91, 91, 214, 1) !important;
+  border-radius: 6px !important;
+}
+
+.text-primary {
+  color: rgba(91, 91, 214, 1) !important;
+}
+
+.btn-light {
+  border-radius: 6px !important;
+}
+/* ── ngb-datepicker navigation header fix ─────────────────────────────────── */
+ngb-datepicker .ngb-dp-header {
+  background: #ffffff !important;
+  border-bottom: 1px solid rgba(230, 235, 240, 1) !important;
+  padding: 10px 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.ngb-dp-navigation-select {
+  display: flex !important;
+  gap: 6px !important;
+  flex: 1 !important;
+  justify-content: center !important;
+}
+
+.ngb-dp-navigation-select select {
+  display: block !important;
+  height: 30px !important;
+  padding: 0 8px !important;
+  border: 1px solid rgba(216, 220, 235, 1) !important;
+  border-radius: 5px !important;
+  background-color: #ffffff !important;
+  color: rgba(47, 48, 89, 1) !important;
+  font-family: 'Circular-Std', Arial, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+  outline: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.ngb-dp-navigation-select select:focus {
+  border-color: rgba(170, 175, 255, 1) !important;
+  box-shadow: 0 0 0 2px rgba(170, 175, 255, 0.35) !important;
+}
+
+.ngb-dp-arrow {
+  display: none !important;
+}
+
+.ngb-dp-month-name {
+  display: none !important;
+}

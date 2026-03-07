@@ -64,81 +64,31 @@
         </div>
 
         <div class="field">
+          <label for="start-date-input">Start Date</label>
+          <input
+            id="start-date-input"
+            class="date-input"
+            type="date"
+            formControlName="startDate"
+          />
+          @if (startDateControl.touched && startDateControl.invalid) {
+            <div class="error-text">Start date is required.</div>
+          }
+        </div>
+
+        <div class="field">
           <label for="end-date-input">End Date</label>
-          <div class="date-input-wrapper" (click)="$event.stopPropagation()">
-            <input
-              id="end-date-input"
-              class="date-input"
-              type="text"
-              formControlName="endDate"
-              ngbDatepicker
-              #dpEnd="ngbDatepicker"
-              [displayMonths]="1"
-              [navigation]="'arrows'"
-              [autoClose]="true"
-              container="body"
-              placeholder="MM/DD/YYYY"
-              readonly
-              (click)="dpEnd.toggle()"
-            />
-            <button
-              type="button"
-              class="date-toggle-btn"
-              (click)="dpEnd.toggle()"
-              tabindex="-1"
-              aria-label="Toggle end date picker"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="1.5" y="2.5" width="13" height="12" rx="2" stroke="#C8CFE9" stroke-width="1.4"/>
-                <path d="M1.5 6.5H14.5" stroke="#C8CFE9" stroke-width="1.4"/>
-                <path d="M5 1.5V3.5" stroke="#C8CFE9" stroke-width="1.4" stroke-linecap="round"/>
-                <path d="M11 1.5V3.5" stroke="#C8CFE9" stroke-width="1.4" stroke-linecap="round"/>
-              </svg>
-            </button>
-          </div>
+          <input
+            id="end-date-input"
+            class="date-input"
+            type="date"
+            formControlName="endDate"
+          />
           @if (endDateControl.touched && endDateControl.invalid) {
             <div class="error-text">End date is required.</div>
           }
           @if (dateOrderInvalid) {
             <div class="error-text">End date must be on or after start date.</div>
-          }
-        </div>
-
-        <div class="field">
-          <label for="start-date-input">Start Date</label>
-          <div class="date-input-wrapper" (click)="$event.stopPropagation()">
-            <input
-              id="start-date-input"
-              class="date-input"
-              type="text"
-              formControlName="startDate"
-              ngbDatepicker
-              #dpStart="ngbDatepicker"
-              [displayMonths]="1"
-              [navigation]="'arrows'"
-              [autoClose]="true"
-              container="body"
-              placeholder="MM/DD/YYYY"
-              readonly
-              (click)="dpStart.toggle()"
-            />
-            <button
-              type="button"
-              class="date-toggle-btn"
-              (click)="dpStart.toggle()"
-              tabindex="-1"
-              aria-label="Toggle start date picker"
-            >
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="1.5" y="2.5" width="13" height="12" rx="2" stroke="#C8CFE9" stroke-width="1.4"/>
-                <path d="M1.5 6.5H14.5" stroke="#C8CFE9" stroke-width="1.4"/>
-                <path d="M5 1.5V3.5" stroke="#C8CFE9" stroke-width="1.4" stroke-linecap="round"/>
-                <path d="M11 1.5V3.5" stroke="#C8CFE9" stroke-width="1.4" stroke-linecap="round"/>
-              </svg>
-            </button>
-          </div>
-          @if (startDateControl.touched && startDateControl.invalid) {
-            <div class="error-text">Start date is required.</div>
           }
         </div>
 

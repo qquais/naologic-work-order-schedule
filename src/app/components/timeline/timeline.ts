@@ -1,4 +1,10 @@
-import { Component, HostListener } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  HostListener,
+  ViewChild
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -46,7 +52,10 @@ interface TimelineColumn {
   templateUrl: './timeline.html',
   styleUrl: './timeline.scss'
 })
-export class Timeline {
+export class Timeline implements AfterViewInit {
+
+  @ViewChild('timelineViewport') viewportRef!: ElementRef<HTMLDivElement>;
+
   workCenters = WORK_CENTERS;
   workOrders: WorkOrderDocument[] = [...WORK_ORDERS];
 
@@ -56,11 +65,12 @@ export class Timeline {
   readonly dayViewCount   = 21;
   readonly weekViewCount  = 8;
   readonly monthViewCount = 6;
+  readonly hourViewCount  = 24;
 
   selectedSlot: SelectedSlot | null = null;
-  isPanelOpen       = false;
+  isPanelOpen           = false;
   panelMode: 'create' | 'edit' = 'create';
-  panelOverlapError = '';
+  panelOverlapError     = '';
   editingWorkOrder: EditableWorkOrder | null = null;
   openMenuForDocId: string | null = null;
   timescaleDropdownOpen = false;
@@ -71,11 +81,15 @@ export class Timeline {
     this.timescaleDropdownOpen = false;
   }
 
+  ngAfterViewInit(): void {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => this.scrollToToday());
+    });
+  }
+
   get dayViewStart(): Date {
     return startOfDay(subDays(new Date(), Math.floor(this.dayViewCount / 2)));
   }
-
-  readonly hourViewCount = 24;
 
   get columns(): TimelineColumn[] {
     switch (this.selectedTimescale) {
@@ -110,7 +124,6 @@ export class Timeline {
   getWorkOrdersForCenter(workCenterId: string): WorkOrderDocument[] {
     return this.workOrders.filter(order => {
       if (order.data.workCenterId !== workCenterId) return false;
-      // Only render bars that overlap the visible date range
       const barStart = parseISO(order.data.startDate);
       const barEnd   = parseISO(order.data.endDate);
       return barStart <= this.rangeEnd && barEnd >= this.rangeStart;
@@ -158,8 +171,12 @@ export class Timeline {
     return isWithinInterval(new Date(), { start: column.start, end: column.end });
   }
 
+  get todayColumnIndex(): number {
+    return this.columns.findIndex(col => this.isTodayColumn(col));
+  }
+
   get todayOffset(): number | null {
-    const idx = this.columns.findIndex(col => this.isTodayColumn(col));
+    const idx = this.todayColumnIndex;
     if (idx === -1) return null;
     return idx * this.columnWidth + this.columnWidth / 2;
   }
@@ -172,12 +189,26 @@ export class Timeline {
     return this.openMenuForDocId === docId;
   }
 
+  toggleTimescaleDropdown(): void {
+    this.timescaleDropdownOpen = !this.timescaleDropdownOpen;
+  }
+
+  selectTimescale(scale: Timescale): void {
+    this.selectedTimescale = scale;
+    this.timescaleDropdownOpen = false;
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => this.scrollToToday());
+    });
+  }
+
   onTimelineRowClick(event: MouseEvent, workCenterId: string): void {
     if ((event.target as HTMLElement).closest('.work-order-bar')) return;
 
+    const viewport   = this.viewportRef?.nativeElement;
+    const scrollLeft = viewport?.scrollLeft ?? 0;
     const rowEl      = event.currentTarget as HTMLElement;
     const rect       = rowEl.getBoundingClientRect();
-    const clickX     = event.clientX - rect.left;
+    const clickX = event.clientX - rect.left + scrollLeft;
 
     const columnIndex = Math.max(0, Math.min(
       Math.floor(clickX / this.columnWidth),
@@ -273,13 +304,16 @@ export class Timeline {
     this.closePanel();
   }
 
-  toggleTimescaleDropdown(): void {
-    this.timescaleDropdownOpen = !this.timescaleDropdownOpen;
-  }
+  private scrollToToday(): void {
+    if (!this.viewportRef) return;
+    const viewport = this.viewportRef.nativeElement;
+    const idx = this.todayColumnIndex;
+    if (idx === -1) return;
 
-  selectTimescale(scale: Timescale): void {
-    this.selectedTimescale = scale;
-    this.timescaleDropdownOpen = false;
+    const todayPx = idx * this.columnWidth + this.columnWidth / 2;
+    // Fall back to window width minus left-column if clientWidth is 0 on first paint
+    const vpWidth = viewport.clientWidth || (window.innerWidth - 380);
+    viewport.scrollLeft = Math.max(0, todayPx - vpWidth / 2);
   }
 
   private hasOverlap(wc: string, start: string, end: string, exclude?: string): boolean {
@@ -305,7 +339,7 @@ export class Timeline {
       return {
         key:   hour.getTime(),
         start: startOfHour(hour),
-        end:   endOfDay(i === 23 ? hour : addHours(hour, 1)),
+        end:   i === 23 ? endOfDay(hour) : startOfHour(addHours(hour, 1)),
         label: format(hour, 'ha').toLowerCase()
       };
     });
@@ -317,7 +351,7 @@ export class Timeline {
       return {
         key:   date.getTime(),
         start: startOfDay(date),
-        end:   endOfDay(date),   
+        end:   endOfDay(date),
         label: format(date, 'MMM d')
       };
     });

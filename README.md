@@ -166,6 +166,8 @@ AI assistance (Claude) was used during this project for:
 - SCSS animation keyframes
 - Generating test case scaffolding for edge cases (overlap, localStorage fallback, keyboard nav)
 
+> Full prompts and decision log: [AI-PROMPTS.md](./AI-PROMPTS.md)
+
 All component architecture, TypeScript interfaces, form structure, and final code decisions were made and reviewed manually.
 
 ---

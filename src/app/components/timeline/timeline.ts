@@ -8,7 +8,6 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
-  addHours,
   addDays,
   addMonths,
   addWeeks,
@@ -22,7 +21,6 @@ import {
   isWithinInterval,
   parseISO,
   startOfDay,
-  startOfHour,
   startOfMonth,
   startOfWeek,
   subDays
@@ -59,13 +57,12 @@ export class Timeline implements AfterViewInit {
   workCenters = WORK_CENTERS;
   workOrders: WorkOrderDocument[] = [...WORK_ORDERS];
 
-  readonly timescales: Timescale[] = ['Hour', 'Day', 'Week', 'Month'];
+  readonly timescales: Timescale[] = ['Day', 'Week', 'Month'];
   selectedTimescale: Timescale = 'Day';
 
   readonly dayViewCount   = 21;
   readonly weekViewCount  = 8;
   readonly monthViewCount = 6;
-  readonly hourViewCount  = 24;
 
   selectedSlot: SelectedSlot | null = null;
   isPanelOpen           = false;
@@ -93,7 +90,6 @@ export class Timeline implements AfterViewInit {
 
   get columns(): TimelineColumn[] {
     switch (this.selectedTimescale) {
-      case 'Hour':  return this.buildHourColumns();
       case 'Week':  return this.buildWeekColumns();
       case 'Month': return this.buildMonthColumns();
       default:      return this.buildDayColumns();
@@ -102,7 +98,6 @@ export class Timeline implements AfterViewInit {
 
   get columnWidth(): number {
     switch (this.selectedTimescale) {
-      case 'Hour':  return 100;
       case 'Week':  return 180;
       case 'Month': return 220;
       default:      return 120;
@@ -117,7 +112,6 @@ export class Timeline implements AfterViewInit {
   get rangeEnd():   Date { return this.columns[this.columns.length - 1].end; }
 
   get currentLabel(): string {
-    if (this.selectedTimescale === 'Hour') return 'Current day';
     return `Current ${this.selectedTimescale.toLowerCase()}`;
   }
 
@@ -133,8 +127,6 @@ export class Timeline implements AfterViewInit {
   getBarLeft(order: WorkOrderDocument): number {
     const start = parseISO(order.data.startDate);
     switch (this.selectedTimescale) {
-      case 'Hour':
-        return differenceInCalendarDays(startOfDay(start), startOfDay(this.rangeStart)) * 24 * this.columnWidth;
       case 'Week':
         return differenceInCalendarWeeks(start, this.rangeStart, { weekStartsOn: 1 }) * this.columnWidth;
       case 'Month':
@@ -148,8 +140,6 @@ export class Timeline implements AfterViewInit {
     const start = parseISO(order.data.startDate);
     const end   = parseISO(order.data.endDate);
     switch (this.selectedTimescale) {
-      case 'Hour':
-        return (differenceInCalendarDays(end, start) + 1) * 24 * this.columnWidth;
       case 'Week':
         return (differenceInCalendarWeeks(end, start, { weekStartsOn: 1 }) + 1) * this.columnWidth;
       case 'Month':
@@ -311,7 +301,6 @@ export class Timeline implements AfterViewInit {
     if (idx === -1) return;
 
     const todayPx = idx * this.columnWidth + this.columnWidth / 2;
-    // Fall back to window width minus left-column if clientWidth is 0 on first paint
     const vpWidth = viewport.clientWidth || (window.innerWidth - 380);
     viewport.scrollLeft = Math.max(0, todayPx - vpWidth / 2);
   }
@@ -330,19 +319,6 @@ export class Timeline implements AfterViewInit {
   private generateId(): string {
     return typeof crypto !== 'undefined' && 'randomUUID' in crypto
       ? `wo-${crypto.randomUUID()}` : `wo-${Date.now()}`;
-  }
-
-  private buildHourColumns(): TimelineColumn[] {
-    const todayStart = startOfDay(new Date());
-    return Array.from({ length: this.hourViewCount }, (_, i) => {
-      const hour = addHours(todayStart, i);
-      return {
-        key:   hour.getTime(),
-        start: startOfHour(hour),
-        end:   i === 23 ? endOfDay(hour) : startOfHour(addHours(hour, 1)),
-        label: format(hour, 'ha').toLowerCase()
-      };
-    });
   }
 
   private buildDayColumns(): TimelineColumn[] {

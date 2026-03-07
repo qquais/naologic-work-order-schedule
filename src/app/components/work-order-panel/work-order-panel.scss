@@ -1,0 +1,384 @@
+:host {
+  display: block;
+  font-family: 'Circular-Std', Arial, sans-serif;
+}
+
+.panel-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  background: rgba(246, 248, 252, 0.78);
+  backdrop-filter: blur(1px);
+}
+
+.panel {
+  width: 591px;
+  max-width: 100%;
+  height: 100vh;
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 12px 0 0 12px;
+  box-shadow:
+    0 5px 15px 0 rgba(216, 220, 235, 1),
+    0 2.5px 3px -1.5px rgba(200, 207, 233, 1),
+    0 4.5px 5px -1px rgba(216, 220, 235, 1);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 24px 16px 24px;
+  border-bottom: 1px solid rgba(230, 235, 240, 1);
+}
+
+.panel-heading {
+  min-width: 0;
+
+  h2 {
+    margin: 0;
+    color: rgba(47, 48, 89, 1);
+    font-family: 'Circular-Std', Arial, sans-serif;
+    font-size: 20px;
+    line-height: 25px;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 4px 0 0 0;
+    color: rgba(104, 113, 150, 1);
+    font-family: 'Circular-Std', Arial, sans-serif;
+    font-size: 16px;
+    line-height: 20px;
+    font-weight: 400;
+  }
+}
+
+.panel-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.header-secondary-button {
+  min-width: 66px;
+  height: 32px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 7px;
+  background-color: rgba(255, 255, 255, 1);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 1),
+    0 1px 3px 0 rgba(200, 207, 233, 1);
+  color: rgba(47, 48, 89, 1);
+  font-family: 'Circular-Std', Arial, sans-serif;
+  font-size: 15px;
+  line-height: 19px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background-color: #f7f8fc;
+  }
+}
+
+.header-primary-button {
+  min-width: 66px;
+  height: 32px;
+  padding: 0 14px;
+  border: none;
+  border-radius: 7px;
+  background: rgba(91, 91, 214, 1);
+  color: rgba(255, 255, 255, 1);
+  font-family: 'Circular-Std', Arial, sans-serif;
+  font-size: 15px;
+  line-height: 19px;
+  font-weight: 400;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: rgba(74, 74, 196, 1);
+  }
+}
+
+.panel-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  flex: 1;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  label {
+    color: rgba(104, 113, 150, 1);
+    font-family: 'Circular-Std', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 16px;
+    font-weight: 500;
+  }
+
+  input[type='text']:not(.date-input) {
+    height: 38px;
+    padding: 0 14px;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 1);
+    outline: none;
+    color: rgba(47, 48, 89, 1);
+    font-family: 'Circular-Std', Arial, sans-serif;
+    font-size: 14px;
+    line-height: 18px;
+    font-weight: 400;
+    box-sizing: border-box;
+    width: 100%;
+    box-shadow:
+      0 0 0 1px rgba(216, 220, 235, 1),
+      0 1.5px 3px -1.5px rgba(200, 207, 233, 1),
+      0 1px 0.5px -1px rgba(216, 220, 235, 1);
+    transition: box-shadow 0.15s ease;
+
+    &::placeholder {
+      color: rgba(104, 113, 150, 1);
+    }
+
+    &:focus {
+      box-shadow:
+        0 0 0 1px rgba(91, 91, 214, 0.5),
+        0 1.5px 3px -1.5px rgba(200, 207, 233, 1);
+    }
+  }
+}
+
+.date-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.date-input {
+  height: 38px;
+  width: 100%;
+  padding: 0 40px 0 14px;
+  border: none;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 1);
+  outline: none;
+  color: rgba(104, 113, 150, 1);
+  font-family: 'Circular-Std', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 18px;
+  font-weight: 500;
+  box-sizing: border-box;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px rgba(216, 220, 235, 1),
+    0 1.5px 3px -1.5px rgba(200, 207, 233, 1),
+    0 1px 0.5px -1px rgba(216, 220, 235, 1);
+  transition: box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: rgba(104, 113, 150, 1);
+  }
+
+  &:focus {
+    box-shadow:
+      0 0 0 1px rgba(91, 91, 214, 0.5),
+      0 1.5px 3px -1.5px rgba(200, 207, 233, 1);
+  }
+}
+
+.date-toggle-btn {
+  position: absolute;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  color: rgba(200, 207, 233, 1);
+
+  &:hover svg rect,
+  &:hover svg path {
+    stroke: rgba(104, 113, 150, 1);
+  }
+}
+
+.error-text {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  color: #dc2626;
+}
+
+.overlap-error {
+  padding: 12px 14px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff5f5;
+  color: #b91c1c;
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+}
+
+.status-badge-option {
+  display: inline-block;
+  font-family: 'Circular-Std', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 16px;
+
+  &--open        { color: rgba(0, 176, 191, 1); }
+  &--in-progress { color: rgba(62, 64, 219, 1); }
+  &--complete    { color: rgba(8, 162, 104, 1); }
+  &--blocked     { color: rgba(177, 54, 0, 1); }
+}
+
+:host ::ng-deep .ng-select {
+  width: 100%;
+}
+
+:host ::ng-deep .ng-select .ng-select-container {
+  min-height: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 1);
+  cursor: pointer;
+  box-shadow:
+    0 0 0 1px rgba(216, 220, 235, 1),
+    0 1.5px 3px -1.5px rgba(200, 207, 233, 1),
+    0 1px 0.5px -1px rgba(216, 220, 235, 1);
+}
+
+:host ::ng-deep .ng-select .ng-value-container {
+  padding-left: 12px;
+  align-items: center;
+}
+
+:host ::ng-deep .ng-select .ng-value {
+  color: rgba(47, 48, 89, 1);
+  font-family: 'Circular-Std', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  background: transparent !important;
+  border: none !important;
+}
+
+:host ::ng-deep .ng-select .ng-arrow-wrapper {
+  padding-right: 12px;
+}
+
+:host ::ng-deep .ng-select .ng-arrow {
+  border-color: rgba(200, 207, 233, 1) transparent transparent;
+}
+
+:host ::ng-deep .ng-select.ng-select-focused .ng-select-container {
+  box-shadow: 0 0 0 2px rgba(170, 175, 255, 1);
+}
+
+:host ::ng-deep .ng-dropdown-panel {
+  border: none;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 1);
+  box-shadow:
+    0 0 0 1px rgba(104, 113, 150, 0.1),
+    0 2.5px 3px -1.5px rgba(200, 207, 233, 1),
+    0 4.5px 5px -1px rgba(216, 220, 235, 1);
+  overflow: hidden;
+}
+
+:host ::ng-deep .ng-dropdown-panel .ng-dropdown-panel-items {
+  padding: 4px 0;
+}
+
+:host ::ng-deep .ng-option {
+  padding: 10px 14px;
+  background: #ffffff;
+  color: rgba(47, 48, 89, 1);
+  font-family: 'Circular-Std', Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+:host ::ng-deep .ng-option.ng-option-marked {
+  background: rgba(241, 243, 248, 0.75);
+}
+
+:host ::ng-deep .ng-option.ng-option-selected {
+  background: rgba(237, 238, 255, 0.5);
+}
+
+:host ::ng-deep ngb-datepicker {
+  border: 1px solid rgba(216, 220, 235, 1);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(200, 207, 233, 0.8);
+  font-family: 'Circular-Std', Arial, sans-serif;
+}
+
+:host ::ng-deep .ngb-dp-header {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(230, 235, 240, 1);
+  padding: 10px 12px;
+}
+
+:host ::ng-deep .ngb-dp-month-name {
+  color: rgba(47, 48, 89, 1);
+  font-weight: 500;
+  font-size: 14px;
+  font-family: 'Circular-Std', Arial, sans-serif;
+}
+
+:host ::ng-deep .ngb-dp-weekday {
+  color: rgba(104, 113, 150, 1);
+  font-size: 11px;
+  font-weight: 400;
+  font-style: normal;
+  font-family: 'Circular-Std', Arial, sans-serif;
+}
+
+:host ::ng-deep .ngb-dp-day,
+:host ::ng-deep .ngb-dp-week-number {
+  font-size: 12px;
+  font-family: 'Circular-Std', Arial, sans-serif;
+}
+
+:host ::ng-deep .btn-light { border-radius: 6px; }
+:host ::ng-deep .bg-primary { background-color: rgba(91, 91, 214, 1) !important; border-radius: 6px; }
+:host ::ng-deep .text-primary { color: rgba(91, 91, 214, 1) !important; }
+
+@media (max-width: 768px) {
+  .panel {
+    width: 100%;
+    border-radius: 0;
+  }
+
+  .panel-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .panel-header-actions {
+    justify-content: flex-end;
+  }
+}

@@ -1,0 +1,140 @@
+<div class="page-shell">
+  <div class="brand-bar">
+    <img
+      class="brand-logo-image"
+      src="naologic-logo.png"
+      alt="Naologic"
+    />
+  </div>
+
+  <div class="page-header">
+    <div class="page-header-left">
+      <h1>Work Orders</h1>
+
+      <div class="timescale-group" (click)="$event.stopPropagation()">
+      <span class="timescale-label">Timescale</span>
+      <div class="timescale-trigger" (click)="toggleTimescaleDropdown()">
+        <span>{{ selectedTimescale }}</span>
+        <svg width="8" height="5" viewBox="0 0 8 5" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M1 1L4 4L7 1" stroke="rgba(62,64,219,1)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      @if (timescaleDropdownOpen) {
+        <div class="timescale-dropdown">
+          @for (scale of timescales; track scale) {
+            <div
+              class="timescale-option"
+              [class.active]="selectedTimescale === scale"
+              (click)="selectTimescale(scale)"
+            >{{ scale }}</div>
+          }
+        </div>
+      }
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-container">
+    <div class="timeline-grid">
+      <div class="left-column">
+        <div class="left-header">Work Center</div>
+
+        @for (center of workCenters; track center.docId) {
+          <div class="work-center-row">
+            {{ center.data.name }}
+          </div>
+        }
+      </div>
+
+      <div class="timeline-viewport">
+        <div
+          class="timeline-canvas"
+          [style.width.px]="timelineCanvasWidth"
+          [style.--column-width]="columnWidth + 'px'"
+        >
+          @if (showTodayIndicator) {
+            <div class="today-indicator" [style.left.px]="todayOffset"></div>
+          }
+
+          <div class="timeline-header">
+            @for (column of columns; track column.key) {
+              <div class="day-cell" [class.today]="isTodayColumn(column)">
+                @if (isTodayColumn(column)) {
+                  <span class="today-badge">{{ currentLabel }}</span>
+                }
+                {{ column.label }}
+              </div>
+            }
+          </div>
+
+          <div class="timeline-body">
+            @for (center of workCenters; track center.docId) {
+              <div class="timeline-row" (click)="onTimelineRowClick($event, center.docId)">
+
+                <span class="click-hint">Click to add dates</span>
+
+                @for (order of getWorkOrdersForCenter(center.docId); track order.docId) {
+                  <div
+                    class="work-order-bar"
+                    [class.menu-open]="isMenuOpen(order.docId)" [class.status-open]="order.data.status === 'open'" [class.status-in-progress]="order.data.status === 'in-progress'" [class.status-complete]="order.data.status === 'complete'" [class.status-blocked]="order.data.status === 'blocked'"
+                    [style.left.px]="getBarLeft(order)"
+                    [style.width.px]="getBarWidth(order)"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <span class="order-name">{{ order.data.name }}</span>
+
+                    <div class="bar-actions">
+                      <span class="status-label" [class]="order.data.status">
+                        {{ getStatusLabel(order.data.status) }}
+                      </span>
+
+                      <button
+                        type="button"
+                        class="menu-trigger"
+                        (click)="toggleActionsMenu($event, order.docId)"
+                        aria-label="Open actions menu"
+                      >
+                        ⋯
+                      </button>
+
+                      @if (openMenuForDocId === order.docId) {
+                        <div class="actions-menu" (click)="$event.stopPropagation()">
+                          <button
+                            type="button"
+                            class="actions-menu-item"
+                            (click)="onEditWorkOrder($event, order)"
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            type="button"
+                            class="actions-menu-item delete"
+                            (click)="onDeleteWorkOrder($event, order.docId)"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-work-order-panel
+  [isOpen]="isPanelOpen"
+  [mode]="panelMode"
+  [selectedSlot]="selectedSlot"
+  [editingWorkOrder]="editingWorkOrder"
+  [overlapError]="panelOverlapError"
+  (closePanel)="closePanel()"
+  (saveWorkOrder)="handleCreateWorkOrder($event)"
+  (updateWorkOrder)="handleUpdateWorkOrder($event)"
+></app-work-order-panel>

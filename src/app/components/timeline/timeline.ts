@@ -43,6 +43,8 @@ interface TimelineColumn {
   label: string;
 }
 
+const LS_KEY = 'naologic_work_orders';
+
 @Component({
   selector: 'app-timeline',
   standalone: true,
@@ -55,7 +57,10 @@ export class Timeline implements AfterViewInit {
   @ViewChild('timelineViewport') viewportRef!: ElementRef<HTMLDivElement>;
 
   workCenters = WORK_CENTERS;
-  workOrders: WorkOrderDocument[] = [...WORK_ORDERS];
+
+  // ── localStorage persistence ─────────────────────────────────────────────
+  // On init: try to load from storage, fall back to sample data if nothing saved
+  workOrders: WorkOrderDocument[] = this.loadFromStorage();
 
   readonly timescales: Timescale[] = ['Day', 'Week', 'Month'];
   selectedTimescale: Timescale = 'Day';
@@ -72,6 +77,23 @@ export class Timeline implements AfterViewInit {
   openMenuForDocId: string | null = null;
   timescaleDropdownOpen = false;
 
+  // ── Keyboard navigation ───────────────────────────────────────────────────
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    if (this.isPanelOpen) {
+      this.closePanel();
+      return;
+    }
+    if (this.openMenuForDocId) {
+      this.openMenuForDocId = null;
+      return;
+    }
+    if (this.timescaleDropdownOpen) {
+      this.timescaleDropdownOpen = false;
+    }
+  }
+
   @HostListener('document:click')
   closeMenuOnOutsideClick(): void {
     this.openMenuForDocId = null;
@@ -83,6 +105,8 @@ export class Timeline implements AfterViewInit {
       requestAnimationFrame(() => this.scrollToToday());
     });
   }
+
+  // ── Columns / layout ──────────────────────────────────────────────────────
 
   get dayViewStart(): Date {
     return startOfDay(subDays(new Date(), Math.floor(this.dayViewCount / 2)));
@@ -104,16 +128,15 @@ export class Timeline implements AfterViewInit {
     }
   }
 
-  get timelineCanvasWidth(): number {
-    return this.columns.length * this.columnWidth;
-  }
-
+  get timelineCanvasWidth(): number { return this.columns.length * this.columnWidth; }
   get rangeStart(): Date { return this.columns[0].start; }
   get rangeEnd():   Date { return this.columns[this.columns.length - 1].end; }
 
   get currentLabel(): string {
     return `Current ${this.selectedTimescale.toLowerCase()}`;
   }
+
+  // ── Bar positioning ───────────────────────────────────────────────────────
 
   getWorkOrdersForCenter(workCenterId: string): WorkOrderDocument[] {
     return this.workOrders.filter(order => {
@@ -157,6 +180,8 @@ export class Timeline implements AfterViewInit {
     return map[status] ?? status;
   }
 
+  // ── Today indicator ───────────────────────────────────────────────────────
+
   isTodayColumn(column: TimelineColumn): boolean {
     return isWithinInterval(new Date(), { start: column.start, end: column.end });
   }
@@ -171,13 +196,11 @@ export class Timeline implements AfterViewInit {
     return idx * this.columnWidth + this.columnWidth / 2;
   }
 
-  get showTodayIndicator(): boolean {
-    return this.todayOffset !== null;
-  }
+  get showTodayIndicator(): boolean { return this.todayOffset !== null; }
 
-  isMenuOpen(docId: string): boolean {
-    return this.openMenuForDocId === docId;
-  }
+  // ── UI helpers ────────────────────────────────────────────────────────────
+
+  isMenuOpen(docId: string): boolean { return this.openMenuForDocId === docId; }
 
   toggleTimescaleDropdown(): void {
     this.timescaleDropdownOpen = !this.timescaleDropdownOpen;
@@ -186,10 +209,10 @@ export class Timeline implements AfterViewInit {
   selectTimescale(scale: Timescale): void {
     this.selectedTimescale = scale;
     this.timescaleDropdownOpen = false;
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => this.scrollToToday());
-    });
+    requestAnimationFrame(() => requestAnimationFrame(() => this.scrollToToday()));
   }
+
+  // ── Row / bar interactions ────────────────────────────────────────────────
 
   onTimelineRowClick(event: MouseEvent, workCenterId: string): void {
     if ((event.target as HTMLElement).closest('.work-order-bar')) return;
@@ -198,7 +221,7 @@ export class Timeline implements AfterViewInit {
     const scrollLeft = viewport?.scrollLeft ?? 0;
     const rowEl      = event.currentTarget as HTMLElement;
     const rect       = rowEl.getBoundingClientRect();
-    const clickX = event.clientX - rect.left + scrollLeft;
+    const clickX     = event.clientX - rect.left + scrollLeft;
 
     const columnIndex = Math.max(0, Math.min(
       Math.floor(clickX / this.columnWidth),
@@ -254,7 +277,10 @@ export class Timeline implements AfterViewInit {
     event.stopPropagation();
     this.workOrders = this.workOrders.filter(o => o.docId !== docId);
     this.openMenuForDocId = null;
+    this.saveToStorage();
   }
+
+  // ── Panel ─────────────────────────────────────────────────────────────────
 
   closePanel(): void {
     this.isPanelOpen       = false;
@@ -276,6 +302,7 @@ export class Timeline implements AfterViewInit {
         status: payload.status, startDate: payload.startDate, endDate: payload.endDate
       }
     }];
+    this.saveToStorage();
     this.closePanel();
   }
 
@@ -291,15 +318,40 @@ export class Timeline implements AfterViewInit {
                           status: payload.status, startDate: payload.startDate, endDate: payload.endDate } }
         : o
     );
+    this.saveToStorage();
     this.closePanel();
   }
+
+  // ── Private: storage ──────────────────────────────────────────────────────
+
+  private loadFromStorage(): WorkOrderDocument[] {
+    try {
+      const raw = localStorage.getItem(LS_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw) as WorkOrderDocument[];
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {
+      // corrupted storage — fall through to sample data
+    }
+    return [...WORK_ORDERS];
+  }
+
+  private saveToStorage(): void {
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(this.workOrders));
+    } catch {
+      // storage unavailable (private browsing quota) — silently ignore
+    }
+  }
+
+  // ── Private: helpers ──────────────────────────────────────────────────────
 
   private scrollToToday(): void {
     if (!this.viewportRef) return;
     const viewport = this.viewportRef.nativeElement;
     const idx = this.todayColumnIndex;
     if (idx === -1) return;
-
     const todayPx = idx * this.columnWidth + this.columnWidth / 2;
     const vpWidth = viewport.clientWidth || (window.innerWidth - 380);
     viewport.scrollLeft = Math.max(0, todayPx - vpWidth / 2);
@@ -324,20 +376,12 @@ export class Timeline implements AfterViewInit {
   private buildDayColumns(): TimelineColumn[] {
     return Array.from({ length: this.dayViewCount }, (_, i) => {
       const date = addDays(this.dayViewStart, i);
-      return {
-        key:   date.getTime(),
-        start: startOfDay(date),
-        end:   endOfDay(date),
-        label: format(date, 'MMM d')
-      };
+      return { key: date.getTime(), start: startOfDay(date), end: endOfDay(date), label: format(date, 'MMM d') };
     });
   }
 
   private buildWeekColumns(): TimelineColumn[] {
-    const first = addWeeks(
-      startOfWeek(new Date(), { weekStartsOn: 1 }),
-      -Math.floor(this.weekViewCount / 2)
-    );
+    const first = addWeeks(startOfWeek(new Date(), { weekStartsOn: 1 }), -Math.floor(this.weekViewCount / 2));
     return Array.from({ length: this.weekViewCount }, (_, i) => {
       const start = addWeeks(first, i);
       const end   = endOfWeek(start, { weekStartsOn: 1 });
@@ -346,10 +390,7 @@ export class Timeline implements AfterViewInit {
   }
 
   private buildMonthColumns(): TimelineColumn[] {
-    const first = addMonths(
-      startOfMonth(new Date()),
-      -Math.floor(this.monthViewCount / 2)
-    );
+    const first = addMonths(startOfMonth(new Date()), -Math.floor(this.monthViewCount / 2));
     return Array.from({ length: this.monthViewCount }, (_, i) => {
       const start = addMonths(first, i);
       const end   = endOfMonth(start);

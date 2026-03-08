@@ -58,8 +58,6 @@ export class Timeline implements AfterViewInit {
 
   workCenters = WORK_CENTERS;
 
-  // ── localStorage persistence ─────────────────────────────────────────────
-  // On init: try to load from storage, fall back to sample data if nothing saved
   workOrders: WorkOrderDocument[] = this.loadFromStorage();
 
   readonly timescales: Timescale[] = ['Day', 'Week', 'Month'];
@@ -77,7 +75,6 @@ export class Timeline implements AfterViewInit {
   openMenuForDocId: string | null = null;
   timescaleDropdownOpen = false;
 
-  // ── Keyboard navigation ───────────────────────────────────────────────────
 
   @HostListener('document:keydown.escape')
   onEscapeKey(): void {
@@ -106,8 +103,6 @@ export class Timeline implements AfterViewInit {
     });
   }
 
-  // ── Columns / layout ──────────────────────────────────────────────────────
-
   get dayViewStart(): Date {
     return startOfDay(subDays(new Date(), Math.floor(this.dayViewCount / 2)));
   }
@@ -135,8 +130,6 @@ export class Timeline implements AfterViewInit {
   get currentLabel(): string {
     return `Current ${this.selectedTimescale.toLowerCase()}`;
   }
-
-  // ── Bar positioning ───────────────────────────────────────────────────────
 
   getWorkOrdersForCenter(workCenterId: string): WorkOrderDocument[] {
     return this.workOrders.filter(order => {
@@ -180,8 +173,6 @@ export class Timeline implements AfterViewInit {
     return map[status] ?? status;
   }
 
-  // ── Today indicator ───────────────────────────────────────────────────────
-
   isTodayColumn(column: TimelineColumn): boolean {
     return isWithinInterval(new Date(), { start: column.start, end: column.end });
   }
@@ -198,8 +189,6 @@ export class Timeline implements AfterViewInit {
 
   get showTodayIndicator(): boolean { return this.todayOffset !== null; }
 
-  // ── UI helpers ────────────────────────────────────────────────────────────
-
   isMenuOpen(docId: string): boolean { return this.openMenuForDocId === docId; }
 
   toggleTimescaleDropdown(): void {
@@ -211,8 +200,6 @@ export class Timeline implements AfterViewInit {
     this.timescaleDropdownOpen = false;
     requestAnimationFrame(() => requestAnimationFrame(() => this.scrollToToday()));
   }
-
-  // ── Row / bar interactions ────────────────────────────────────────────────
 
   onTimelineRowClick(event: MouseEvent, workCenterId: string): void {
     if ((event.target as HTMLElement).closest('.work-order-bar')) return;
@@ -280,8 +267,6 @@ export class Timeline implements AfterViewInit {
     this.saveToStorage();
   }
 
-  // ── Panel ─────────────────────────────────────────────────────────────────
-
   closePanel(): void {
     this.isPanelOpen       = false;
     this.selectedSlot      = null;
@@ -322,8 +307,6 @@ export class Timeline implements AfterViewInit {
     this.closePanel();
   }
 
-  // ── Private: storage ──────────────────────────────────────────────────────
-
   private loadFromStorage(): WorkOrderDocument[] {
     try {
       const raw = localStorage.getItem(LS_KEY);
@@ -332,7 +315,7 @@ export class Timeline implements AfterViewInit {
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch {
-      // corrupted storage — fall through to sample data
+      // storage unavailable or corrupted data — silently ignore and start fresh
     }
     return [...WORK_ORDERS];
   }
@@ -341,11 +324,9 @@ export class Timeline implements AfterViewInit {
     try {
       localStorage.setItem(LS_KEY, JSON.stringify(this.workOrders));
     } catch {
-      // storage unavailable (private browsing quota) — silently ignore
+      // storage unavailable (e.g. quota exceeded) — silently ignore but log the error
     }
   }
-
-  // ── Private: helpers ──────────────────────────────────────────────────────
 
   private scrollToToday(): void {
     if (!this.viewportRef) return;
